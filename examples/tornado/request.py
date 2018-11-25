@@ -21,7 +21,7 @@ async def main():
 
     client = TornadoClient("http://localhost:5000/rpc/", interceptor=tracer_interceptor)
     response = await client.request("add")
-    print(response.data.result)
+    return response.data.result
 
 
 async def spantest():
@@ -32,11 +32,13 @@ async def spantest():
 
         client = TornadoClient("http://localhost:5000/rpc/", interceptor=tracer_interceptor)
         response = await client.request("add")
-        print(response.data.result)
+        return response.data.result
 
 
-IOLoop.current().run_sync(main)
-IOLoop.current().run_sync(spantest)
+res = IOLoop.current().run_sync(main)
+print(res)
+res = IOLoop.current().run_sync(spantest)
+print(res)
 
 import time; time.sleep(2)
 tracer.close()
