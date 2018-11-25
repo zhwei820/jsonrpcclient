@@ -15,17 +15,28 @@ config = Config(
     service_name='trivial-client')
 
 tracer = config.initialize_tracer()
-tracer_interceptor = open_tracing_client_interceptor(tracer)
-
-client = TornadoClient("http://localhost:5000/rpc/", interceptor=tracer_interceptor)
-
 
 async def main():
+    tracer_interceptor = open_tracing_client_interceptor(tracer)
+
+    client = TornadoClient("http://localhost:5000/rpc/", interceptor=tracer_interceptor)
     response = await client.request("add")
     print(response.data.result)
 
 
-IOLoop.current().run_sync(main)
+async def spantest():
 
-import time; time.sleep(1)
+    with tracer.start_span('command_line_client_span') as span:
+        tracer_interceptor = open_tracing_client_interceptor(tracer, active_span_source=span)
+        span.log_kv({'ahahaha': 'monster'})
+
+        client = TornadoClient("http://localhost:5000/rpc/", interceptor=tracer_interceptor)
+        response = await client.request("add")
+        print(response.data.result)
+
+
+IOLoop.current().run_sync(main)
+IOLoop.current().run_sync(spantest)
+
+import time; time.sleep(2)
 tracer.close()
