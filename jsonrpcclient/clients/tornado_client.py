@@ -59,8 +59,15 @@ class TornadoClient(AsyncClient):
         headers = dict(self.DEFAULT_HEADERS)
         headers.update(kwargs.pop("headers", {}))
 
-        response = await self.client.fetch(
-            self.endpoint, method="POST", body=request, headers=headers, **kwargs
-        )
+        if not self.interceptor:
+            response = await self.client.fetch(
+                self.endpoint, method="POST", body=request, headers=headers, **kwargs
+            )
+        else:
+            guarded_span, headers = self.interceptor.trace_before_request(request, headers)
+            response = await self.client.fetch(
+                self.endpoint, method="POST", body=request, headers=headers, **kwargs
+            )
+            self.interceptor.trace_after_request(response, guarded_span)
 
         return Response(response.body.decode(), raw=response)

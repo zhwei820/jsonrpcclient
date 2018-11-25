@@ -39,6 +39,7 @@ class Client(metaclass=ABCMeta):
         validate_against_schema: bool = True,
         id_generator: Optional[Iterator] = None,
         basic_logging: bool = False,
+        interceptor: Any = None,
     ) -> None:
         """
         Args:
@@ -51,6 +52,7 @@ class Client(metaclass=ABCMeta):
         self.trim_log_values = trim_log_values
         self.validate_against_schema = validate_against_schema
         self.id_generator = id_generator
+        self.interceptor = interceptor
         if basic_logging:
             self.basic_logging()
 
@@ -167,6 +169,7 @@ class Client(metaclass=ABCMeta):
         response = self.send_message(
             request_text, response_expected=response_expected, **kwargs
         )
+
         self.log_response(response, trim_log_values=trim_log_values)
         self.validate_response(response)
         response.data = parse(
