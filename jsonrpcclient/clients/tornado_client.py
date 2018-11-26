@@ -68,6 +68,6 @@ class TornadoClient(AsyncClient):
             response = await self.client.fetch(
                 self.endpoint, method="POST", body=request, headers=headers, **kwargs
             )
-            self.interceptor.trace_after_request(response, guarded_span)
+            self.interceptor.trace_after_request(response.body, guarded_span)
 
         return Response(response.body.decode(), raw=response)

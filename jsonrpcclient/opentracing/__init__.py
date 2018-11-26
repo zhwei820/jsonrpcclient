@@ -19,6 +19,16 @@ class ActiveSpanSource(six.with_metaclass(abc.ABCMeta)):
         raise NotImplementedError()
 
 
+class FixedActiveSpanSource(ActiveSpanSource):
+
+    def __init__(self):
+        self.active_span = None
+
+    def get_active_span(self):
+        return self.active_span
+
+
+
 class RpcInfo(six.with_metaclass(abc.ABCMeta)):
     """Provides information for an RPC call.
 

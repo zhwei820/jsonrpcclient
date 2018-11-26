@@ -66,8 +66,9 @@ class OpenTracingClientInterceptor():
     def _start_span(self, method):
         active_span_context = None
         if self._active_span_source is not None:
-            active_span = self._active_span_source
-            active_span_context = active_span.context
+            active_span = self._active_span_source.get_active_span()
+            if active_span is not None:
+                active_span_context = active_span.context
         tags = {
             ot_tags.COMPONENT: 'jsonrpc',
             ot_tags.SPAN_KIND: ot_tags.SPAN_KIND_RPC_CLIENT
@@ -87,6 +88,6 @@ class OpenTracingClientInterceptor():
 
             return guarded_span, headers
 
-    def trace_after_request(self, response, guarded_span):
+    def trace_after_request(self, response_text, guarded_span):
         if self._log_payloads:
-            guarded_span.span.log_kv({'response': response.body})
+            guarded_span.span.log_kv({'response': response_text})

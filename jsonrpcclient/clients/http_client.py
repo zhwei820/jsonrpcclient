@@ -60,5 +60,13 @@ class HTTPClient(Client):
         Returns:
             A Response object.
         """
-        response = self.session.post(self.endpoint, data=request.encode(), **kwargs)
+        if not self.interceptor:
+            response = self.session.post(self.endpoint, data=request.encode(), **kwargs)
+        else:
+            headers = {}
+            guarded_span, headers = self.interceptor.trace_before_request(request, headers)
+            self.session.headers.update(headers)
+            response = self.session.post(self.endpoint, data=request.encode(), **kwargs)
+            self.interceptor.trace_after_request(response.content, guarded_span)
+
         return Response(response.text, raw=response)
